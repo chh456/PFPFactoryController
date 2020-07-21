@@ -50,7 +50,7 @@ public class State {
 		return procedure;
 	}
 	
-	public void addSuccessor(State end) {
+	public void addSuccessor(State end) { 
 		addSuccessor(end, null);
 	}
 	

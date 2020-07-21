@@ -1,6 +1,6 @@
 package de.uniks.pfp.model;
 
-public class Transition {
+public class Transition { 
 	
 	public State begin, end;
 	public Runnable procedure;
