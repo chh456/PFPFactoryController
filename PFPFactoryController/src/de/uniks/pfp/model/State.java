@@ -44,7 +44,7 @@ public class State {
 		
 		// When this state has a transition into s
 		if ((index = isConnected(s)) != -1) {
-			procedure = transitions.get(index);
+			procedure = transitions.get(index);  
 		}
 		
 		return procedure;
