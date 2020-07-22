@@ -1,9 +1,16 @@
 package de.uniks.pfp.model;
 
-public class Transition { 
+import de.uniks.pfp.interfaces.SensorListener;
+
+public class Transition implements SensorListener { 
 	
 	public State begin, end;
 	public Runnable procedure;
+	
+	boolean sensorStop;
+	
+	boolean finished;
+	
 	
 	String description;
 	
@@ -11,7 +18,9 @@ public class Transition {
 		begin = b;
 		end = e;
 		description = desc;
+		finished = false;
 		b.addSuccessor(e, this);
+		sensorStop = true;
 	}
 	
 	public void setProcedure(Runnable r) {
@@ -24,6 +33,12 @@ public class Transition {
 	
 	public State getEnd() {
 		return end;
+	}
+
+	@Override
+	public void inform(boolean b) {
+		sensorStop = true;
+		
 	}
 
 }
