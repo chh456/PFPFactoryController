@@ -63,21 +63,21 @@ public class FactoryController {
 		
 		// Station Anlieferung
 		
-		State s1 = new State("Leerer Ladungsträger steht auf Anlieferungsförderband");
-		State s2 = new State("Voller Ladungsträger steht auf Anlieferungsförderband");
-		Transition t1 = new Transition("Fülle Ladungsträger auf Anlieferungsförderband", s1, s2);
-		Transition t2 = new Transition("Bewege vollen Ladungsträger in Richtung Drehtisch", s2, null);
+		State s1 = new State("Leerer Ladungstrï¿½ger steht auf Anlieferungsfï¿½rderband");
+		State s2 = new State("Voller Ladungstrï¿½ger steht auf Anlieferungsfï¿½rderband");
+		Transition t1 = new Transition("Fï¿½lle Ladungstrï¿½ger auf Anlieferungsfï¿½rderband", s1, s2);
+		Transition t2 = new Transition("Bewege vollen Ladungstrï¿½ger in Richtung Drehtisch", s2, null);
 
 		// Station Drehtisch
 		
 		
-		State s4 = new State("Ladungsträger steht auf Drehtisch");
+		State s4 = new State("Ladungstrï¿½ger steht auf Drehtisch");
 		State s5 = new State("Drehtisch steht Richtung Anlieferung");
 		State s6 = new State("Drehtisch steht Richtung Lager");
 		State s7 = new State("Drehtisch steht Richtung Einspeisung");
 		
-		// Transition t3 = new Transition("Ladungsträger wird auf Drehtisch befördert", null, null);
-		// Transition t4 = new Transition("Ladungsträger verlässt Drehtisch", null, null);
+		// Transition t3 = new Transition("Ladungstrï¿½ger wird auf Drehtisch befï¿½rdert", null, null);
+		// Transition t4 = new Transition("Ladungstrï¿½ger verlï¿½sst Drehtisch", null, null);
 		Transition t5 = new Transition("Drehtisch dreht Richtung Einspeisung", s5, s6);
 		Transition t6 = new Transition("Drehtisch dreht Richtung Lager", s6, s5);
 		
@@ -161,5 +161,35 @@ public class FactoryController {
 				sensor.shutdown();
 		}
 	}
+	/*
+	 * Transition t1 = new Transition("FÃ¼llturm fÃ¼llt LT", s1, s2);
+	Transition t2 = new Transition("FÃ¶rderbandA transportiert LT auf DT", s2, s3);
+	//A fÃ¼r Anlieferung
+	Transition t4 = new Transition("Drehtisch dreht Richtung Einspeisung", s3, s5);
+	Transition t5 = new Transition("Drehtisch dreht Richtung Einspeisung", s4, s5);
+	Transition t6 = new Transition("Drehtisch dreht Richtung Lager", s3, s4);
+	Transition t7 = new Transition("Drehtisch dreht Richtung Lager", s5, s4);
+	Transition t8 = new Transition("Drehtisch dreht Richtung Anlieferung", s4, s3);
+	Transition t9 = new Transition("Drehtisch dreht Richtung Anlieferung", s5, s3);
+	Transition t10 = new Transition("FÃ¶rderbandD transportiert LT auf Station", null, null); 
+	//D fÃ¼r Drehtisch; Darf jede transition nur fÃ¼r einen ZustandsÃ¼bergang verwendet werden?
+	Transition t11 = new Transition("Greifer greift LT", s10, s9);
+	Transition t12 = new Transition("Kipper hebt LT an", s9, s7);
+	Transition t13 = new Transition("Kipper senkt LT ab", s7, s8);
+	Transition t14 = new Transition("Greifer Ã¶ffnet", s8, s10);
+	Transition t15 = new Transition("FÃ¶rderbandE transportiert LT auf DT", s10, s5);
 
+
+	State s1 = new State ("Leerer LT an Anlieferung");
+	State s2 = new State ("Voller LT an Anlieferung");
+	State s3 = new State("Drehtisch steht Richtung Anlieferung");
+	State s4 = new State("Drehtisch steht Richtung Lager");
+	State s5 = new State("Drehtisch steht Richtung Einspeisung");
+	State s6 = new State ("Kipper unten");
+	State s7 = new State ("Kipper oben");
+	State s8 = new State ("Greifer eingefahren");
+	State s9 = new State ("Greifer ausgefahren");
+	State s10 = new State ("LT an Einspeisung");
+
+	*/
 }
