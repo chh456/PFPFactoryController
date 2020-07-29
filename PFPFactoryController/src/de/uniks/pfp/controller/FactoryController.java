@@ -4,12 +4,16 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import de.uniks.pfp.hardware.PFPBrick;
 import de.uniks.pfp.hardware.PFPMotor;
 import de.uniks.pfp.hardware.PFPSensor;
 import de.uniks.pfp.model.*;
+import de.uniks.pfp.stations.Delivery;
 import de.uniks.pfp.stations.RotatingTable;
 import lejos.remote.ev3.RMIRegulatedMotor;
 import lejos.remote.ev3.RMISampleProvider;
@@ -20,6 +24,42 @@ public class FactoryController {
 	static ArrayList<PFPSensor> sensorList = new ArrayList<>();
 	static ArrayList<PFPMotor> motorList = new ArrayList<>();
 	
+// 	static ArrayList<BrickNameAndIp> bricks = new ArrayList<>();
+	
+	static Map<String, PFPBrick> bricks = new HashMap<String, PFPBrick>();
+	
+	public static class BrickNameAndIp {
+		
+		String name;
+		String ip;
+		
+		public BrickNameAndIp(String name, String ip) {
+			this.name = name;
+			this.ip = ip;
+		}
+
+		
+	}
+	
+	public void initStations() {
+		
+	}
+	
+	public static int initBricks() {
+		int result = 0;
+		
+		String ip = "192.168.0.1";		
+		for (int i = 1; i < 5; i++) {
+			String currentName = (i < 10) ? "0" + i : "" + i;
+			PFPBrick currentBrick = new PFPBrick(ip + currentName);
+			bricks.put(currentName, currentBrick);
+			if (currentBrick.init()) result++;
+		}
+		
+		return result;
+	}
+	
+
 	public static void main(String[] args) {
 		
 		PFPSensor drehtischSensor;
@@ -27,21 +67,37 @@ public class FactoryController {
 		RemoteEV3 brick102 = null;
 		RemoteEV3 brick101 = null;
 		
-		try {
-			brick102 = new RemoteEV3("192.168.0.102");
-			brick101 = new RemoteEV3("192.168.0.101");
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NotBoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//		try {
+//			// brick102 = new RemoteEV3("192.168.0.102");
+//			// brick101 = new RemoteEV3("192.168.0.101");
+//		} catch (RemoteException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (MalformedURLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (NotBoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		System.out.println(initBricks() + " initialisiert");
+		
+		for (int i = 1; i < 10; i++) {
+			if (bricks.containsKey("0" + i))
+				System.out.println("Map contains Brick 0" +i );
 		}
+			
 		
 		
+		Delivery delivery = new Delivery();
+		
+		PFPBrick brick = new PFPBrick("192.168.0.101");
+		System.out.println(brick.initialized());
+		
+		System.exit(-1);
+		
+//		delivery.addBrick(new PFPBrick());
 		
 		
 			// System.exit(-1);
@@ -67,7 +123,14 @@ public class FactoryController {
 		State s2 = new State("Voller Ladungstr�ger steht auf Anlieferungsf�rderband");
 		Transition t1 = new Transition("F�lle Ladungstr�ger auf Anlieferungsf�rderband", s1, s2);
 		Transition t2 = new Transition("Bewege vollen Ladungstr�ger in Richtung Drehtisch", s2, null);
-
+		
+		
+		
+		
+		
+		
+//		PFPMotor fuellturm = PFPMotor.createMotorWithName("Fuellturmmotor");
+		
 		// Station Drehtisch
 		
 		

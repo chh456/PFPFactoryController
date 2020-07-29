@@ -12,6 +12,8 @@ public class PFPMotor implements SensorListener {
 	String port;
 	boolean sensorStop;
 	
+	String id;
+	
 	public PFPMotor(RMIRegulatedMotor m, String port, Character type) {
 		motor = m;
 		this.type = type;
@@ -19,6 +21,14 @@ public class PFPMotor implements SensorListener {
 		sensorStop = false;
 	}
 	
+	public PFPMotor(RMIRegulatedMotor m, String name) {
+		motor = m;
+		id = name;
+	}
+	
+	public static PFPMotor createMotorWithName(RMIRegulatedMotor m, String name) {
+		return new PFPMotor(m, name);
+	}
 	
 	public char getType() {
 		return type;
