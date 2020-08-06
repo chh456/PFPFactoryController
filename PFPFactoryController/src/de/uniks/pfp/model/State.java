@@ -49,12 +49,13 @@ public class State {
 		
 		return procedure;
 	}
-	
+		
 	public void addSuccessor(State end) { 
 		addSuccessor(end, null);
 	}
 	
 	public void addSuccessor(State end, Transition t) {
+		if (end == null) return;
 		int index = isConnected(end);
 		
 		// states were connected before. we update the transition

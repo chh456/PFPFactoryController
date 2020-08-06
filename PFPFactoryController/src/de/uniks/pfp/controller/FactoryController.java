@@ -21,6 +21,17 @@ import lejos.remote.ev3.RemoteEV3;
 
 public class FactoryController {
 
+	// FactoryLayout
+	public class FactoryLayout {
+		String brickName;
+		String brickIp;
+		
+		String [] motorPorts = new String[4];
+		String [] motorTypes = new String[4];
+		String [] sensorPorts = new String[4];
+		String [] sensorTypes = new String[4];
+	}
+	
 	static ArrayList<PFPSensor> sensorList = new ArrayList<>();
 	static ArrayList<PFPMotor> motorList = new ArrayList<>();
 	
@@ -28,30 +39,51 @@ public class FactoryController {
 	
 	static Map<String, PFPBrick> bricks = new HashMap<String, PFPBrick>();
 	
-	public static class BrickNameAndIp {
+	public static class BrickToIp {
 		
 		String name;
 		String ip;
+		PFPBrick brick;
 		
-		public BrickNameAndIp(String name, String ip) {
+		public BrickToIp(String name, String ip) {
 			this.name = name;
 			this.ip = ip;
 		}
-
 		
+		public void setPFPBrick(PFPBrick pfpBrick) {
+			// TODO Auto-generated method stub
+			brick = pfpBrick;
+		}
+		
+	}
+
+static	ArrayList<BrickToIp> brickList = new ArrayList<>();
+	
+	public static void initBrickList() {
+		for (int i = 1; i < 14; i++) {
+			String lastDigits = i < 9 ? "0" + i : "" + i;
+			String ip = "192.168.0.1" + lastDigits;
+			BrickToIp currentBrick = new BrickToIp(lastDigits, ip);
+			currentBrick.setPFPBrick(new PFPBrick(ip));
+			brickList.add(currentBrick);
+		}
 	}
 	
 	public void initStations() {
 		
 	}
 	
-	public static int initBricks() {
+	public static int initBricks(ExecutorService executor) {
 		int result = 0;
 		
+		PFPBrick.setExecutor(executor);
+		
 		String ip = "192.168.0.1";		
-		for (int i = 1; i < 5; i++) {
+		for (int i = 1; i < 14; i++) {
+			if (i > 3 && i < 10) continue;
 			String currentName = (i < 10) ? "0" + i : "" + i;
 			PFPBrick currentBrick = new PFPBrick(ip + currentName);
+			
 			bricks.put(currentName, currentBrick);
 			if (currentBrick.init()) result++;
 		}
@@ -59,63 +91,86 @@ public class FactoryController {
 		return result;
 	}
 	
+	static State currentState = null;
+
+	public static State getCurrentState() {
+		return currentState;
+	}
+
+	public static void setCurrentState(State currentState) {
+		FactoryController.currentState = currentState;
+	}
 
 	public static void main(String[] args) {
 		
-		PFPSensor drehtischSensor;
-		
-		RemoteEV3 brick102 = null;
-		RemoteEV3 brick101 = null;
-		
-//		try {
-//			// brick102 = new RemoteEV3("192.168.0.102");
-//			// brick101 = new RemoteEV3("192.168.0.101");
-//		} catch (RemoteException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (MalformedURLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (NotBoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
-		System.out.println(initBricks() + " initialisiert");
-		
-		for (int i = 1; i < 10; i++) {
-			if (bricks.containsKey("0" + i))
-				System.out.println("Map contains Brick 0" +i );
-		}
-			
-		
-		
-		Delivery delivery = new Delivery();
-		
-		PFPBrick brick = new PFPBrick("192.168.0.101");
-		System.out.println(brick.initialized());
-		
-		System.exit(-1);
-		
-//		delivery.addBrick(new PFPBrick());
-		
-		
-			// System.exit(-1);
-		
-		// RMISampleProvider s = null;
-		RMISampleProvider s = brick102.createSampleProvider("S4", "lejos.hardware.sensor.EV3TouchSensor", null);
-		RMISampleProvider sensor1 = brick102.createSampleProvider("S1", "lejos.hardware.sensor.EV3TouchSensor", null);
-		RMISampleProvider sensor2 = brick101.createSampleProvider("S1", "lejos.hardware.sensor.EV3TouchSensor", null);
-		
 		ExecutorService executor = Executors.newCachedThreadPool();
 		
-		drehtischSensor = new PFPSensor(s, executor);
-		PFPSensor drehtischSensorLager = new PFPSensor(sensor1, executor);
-		PFPSensor drehtischSensorEinspeisung = new PFPSensor(sensor2, executor);
+		PFPBrick b101 = new PFPBrick("192.168.0.101");
+		PFPBrick b102 = new PFPBrick("192.168.0.102");
+		PFPBrick b103 = new PFPBrick("192.168.0.103");
+		PFPBrick b111 = new PFPBrick("192.168.0.111");
+		PFPBrick b112 = new PFPBrick("192.168.0.112");
+		PFPBrick b113 = new PFPBrick("192.168.0.113");
 		
-		sensorList.add(drehtischSensorEinspeisung);
-		sensorList.add(drehtischSensorLager);
+		ArrayList<PFPBrick> bricks = new ArrayList<>();
+		
+		bricks.add(b101);
+		bricks.add(b102);
+		bricks.add(b103);
+		bricks.add(b111);
+		bricks.add(b112);
+		bricks.add(b113);
+		
+
+		for (PFPBrick b : bricks)
+			b.init();
+		
+
+		
+//		executor.shutdown();
+		
+	//	System.exit(-1);
+		
+		PFPSensor drehtischSensor = new PFPSensor(b102.brick.createSampleProvider("S4", "lejos.hardware.sensor.EV3TouchSensor", null), executor);
+		PFPSensor drehtischSensorLager = new PFPSensor(b102.brick.createSampleProvider("S1", "lejos.hardware.sensor.EV3TouchSensor", null), executor);
+		PFPSensor drehtischSensorEinspeisung = new PFPSensor(b101.brick.createSampleProvider("S1", "lejos.hardware.sensor.EV3TouchSensor", null), executor);
+		PFPSensor einspeisungSensor = new PFPSensor(b102.brick.createSampleProvider("S3", "lejos.hardware.sensor.EV3TouchSensor", null), executor);
+		
 		sensorList.add(drehtischSensor);
+		sensorList.add(drehtischSensorLager);
+		sensorList.add(drehtischSensorEinspeisung);
+		sensorList.add(einspeisungSensor);
+		
+		for (PFPSensor p : sensorList)
+			p.activate();
+		
+		
+		PFPMotor fuellturm = new PFPMotor(b102.brick.createRegulatedMotor("A", 'L'), "fuellturm");
+		PFPMotor anlieferungfb = new PFPMotor(b103.brick.createRegulatedMotor("A", 'L'), "anlieferungfb");
+		PFPMotor drehtischfb = new PFPMotor(b102.brick.createRegulatedMotor("D", 'L'), "");
+		PFPMotor drehtischRotation = new PFPMotor(b102.brick.createRegulatedMotor("C", 'L'), "");
+		PFPMotor einspeisungfb = new PFPMotor(b103.brick.createRegulatedMotor("D", 'L'), "");
+		PFPMotor greifarmA = new PFPMotor(b101.brick.createRegulatedMotor("A", 'L'), "");
+		PFPMotor greifarmB = new PFPMotor(b101.brick.createRegulatedMotor("B", 'L'), "");
+		PFPMotor heberA = new PFPMotor(b101.brick.createRegulatedMotor("D", 'L'), "");
+		PFPMotor heberB = new PFPMotor(b101.brick.createRegulatedMotor("C", 'L'), "");
+		
+		motorList.add(fuellturm);
+		motorList.add(anlieferungfb);
+		motorList.add(drehtischfb);
+		motorList.add(drehtischRotation);
+		motorList.add(einspeisungfb);
+		motorList.add(greifarmA);
+		motorList.add(greifarmB);
+		motorList.add(heberA);
+		motorList.add(heberB);
+		
+		// System.out.println(initBricks(executor) + " initialisiert");
+		
+// 		State currentState = new State("Der derzeitige Zustand");
+			
+			
+		// Delivery delivery = new Delivery();
 		
 		// Station Anlieferung
 		
@@ -124,12 +179,41 @@ public class FactoryController {
 		Transition t1 = new Transition("F�lle Ladungstr�ger auf Anlieferungsf�rderband", s1, s2);
 		Transition t2 = new Transition("Bewege vollen Ladungstr�ger in Richtung Drehtisch", s2, null);
 		
+		t1.setProcedure(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				fuellturm.setSpeed(100);
+				fuellturm.forward(5000);
+				FactoryController.setCurrentState(t1.getEnd());
+				System.out.println("Setze Zustand t2");
+				// tcurrentState.(t1.getEnd());
+			}
+			
+		});
 		
-		
-		
-		
-		
-//		PFPMotor fuellturm = PFPMotor.createMotorWithName("Fuellturmmotor");
+		t2.setProcedure(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				drehtischSensor.registerListener(anlieferungfb);
+				while(FactoryController.getCurrentState() != t1.getEnd()) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					System.out.println("Warte auf Ende t1");
+				}
+				System.out.println("Warte auf Drehtischsensor");
+				anlieferungfb.backward();
+				drehtischSensor.removeListener(anlieferungfb);
+			}
+			
+		});
 		
 		// Station Drehtisch
 		
@@ -139,62 +223,104 @@ public class FactoryController {
 		State s6 = new State("Drehtisch steht Richtung Lager");
 		State s7 = new State("Drehtisch steht Richtung Einspeisung");
 		
-		// Transition t3 = new Transition("Ladungstr�ger wird auf Drehtisch bef�rdert", null, null);
+		Transition t3 = new Transition("Ladungstr�ger wird auf Drehtisch bef�rdert", null, s4);
 		// Transition t4 = new Transition("Ladungstr�ger verl�sst Drehtisch", null, null);
 		Transition t5 = new Transition("Drehtisch dreht Richtung Einspeisung", s5, s6);
 		Transition t6 = new Transition("Drehtisch dreht Richtung Lager", s6, s5);
 		
-		RotatingTable rotTable = new RotatingTable(s5, executor);
+		t3.setProcedure(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				drehtischSensor.registerListener(drehtischfb);
+				while(FactoryController.getCurrentState() != t1.getEnd()) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					System.out.println("Warte auf Ende t1");
+				}
+				System.out.println("Warte auf Drehtischsensor");
+				drehtischfb.forward();
+				FactoryController.setCurrentState(s4);
+				drehtischSensor.removeListener(drehtischfb);
+			}
+			
+		});
 		
-		
-		RMIRegulatedMotor drehtischRotation = brick102.createRegulatedMotor("C", 'L');
-		PFPMotor dtRot = new PFPMotor(drehtischRotation, "C", 'L');
-		drehtischSensorEinspeisung.registerListener(dtRot);
-		rotTable.addMotor(dtRot);
-		motorList.add(dtRot);
 		t5.setProcedure(new Runnable() {
 
 			@Override
 			public void run() {
-				System.out.println("Transition started.");
-				dtRot.setSpeed(100);
-				dtRot.forward();
-				System.out.println("Transition stopped.");
-				drehtischSensorEinspeisung.removeListener(dtRot);
+				drehtischSensorEinspeisung.registerListener(drehtischRotation);
+				while(FactoryController.getCurrentState() != s4) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					System.out.println("Warte auf Ende t1");
+				}
+				System.out.println("Warte auf Rotationssensor.");
+				drehtischRotation.setSpeed(70);
+				drehtischRotation.forward();
+				FactoryController.setCurrentState(s7);
+				drehtischSensorEinspeisung.removeListener(drehtischRotation);
 				
 			}
-			
-			
 		});
 		
-		t6.setProcedure(new Runnable() {
-
-			@Override
-			public void run() {
-				drehtischSensorLager.registerListener(dtRot);
-				System.out.println("Transition 2 started.");
-				dtRot.setSpeed(100);
-				dtRot.backward();
-				System.out.println("Transition 2 ended.");
-				
-			}
-			
-		});
+		executor.execute(t1.procedure);
+		executor.execute(t2.procedure);
+		executor.execute(t3.procedure);
+		executor.execute(t5.procedure);
 		
-		
-		// Activate Sensors
-		sensorWork(true);
-		
-		rotTable.goIntoState(s6);
 		
 		try {
-			Thread.sleep(4000);
-		} catch (InterruptedException e1) {
+			while (FactoryController.getCurrentState() != s7)
+				Thread.sleep(100);
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
 		
-		rotTable.goIntoState(s5);
+		sensorWork(false);
+		for (PFPMotor pMotor : motorList) {
+			pMotor.close();
+		}
+		executor.shutdown();
+		
+		
+// 		System.exit(-1);
+		
+//		delivery.addBrick(new PFPBrick());
+		
+		
+			// System.exit(-1);
+		
+		
+		
+		
+		
+
+		
+		
+		
+	
+		
+		
+	
+		
+		
+		
+		// rotTable.goIntoState(s6);
+		
+		
+		// rotTable.goIntoState(s5);
 		
 		
 		// System.out.println(s1.isConnected(s2) != -1 ? "yes" : "no");

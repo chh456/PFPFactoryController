@@ -53,6 +53,21 @@ public class PFPMotor implements SensorListener {
 			e.printStackTrace();
 		}
 	}
+	
+	public void forward(int time) {
+		try {
+			motor.forward();
+			Thread.sleep(time);
+			motor.stop(true);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 
 	public void close() {
 		System.out.println("Closing motor.");

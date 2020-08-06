@@ -19,7 +19,8 @@ public class Transition implements SensorListener {
 		end = e;
 		description = desc;
 		finished = false;
-		b.addSuccessor(e, this);
+		if (b != null)
+			b.addSuccessor(e, this);
 		sensorStop = true;
 	}
 	

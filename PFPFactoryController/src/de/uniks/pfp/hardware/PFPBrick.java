@@ -4,16 +4,29 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import lejos.remote.ev3.RMIRegulatedMotor;
+import lejos.remote.ev3.RMISampleProvider;
 import lejos.remote.ev3.RemoteEV3;
 
 public class PFPBrick {
 
 	String ip;
-	RemoteEV3 brick = null;
+	public RemoteEV3 brick = null;
 	Boolean initialized = false;
 	
+	Map <String, RMIRegulatedMotor> engines;
+	Map <String, RMISampleProvider> sensors;
+	
+	static ExecutorService executor;
+	
+	public static void setExecutor(ExecutorService executor) {
+		PFPBrick.executor = executor;
+	}
+
 	// Number of times we try to init this brick if something soft fails
 	static boolean TRYAGAIN = false;
 	static int MAXTRIALS = 3;
@@ -23,14 +36,23 @@ public class PFPBrick {
 //	ArrayList <Port<String, PFPMotor>> engines = new ArrayList<>();
 //	ArrayList <Port<Integer, PFPSensor>> sensors = new ArrayList<>();
 	
-
+	public PFPBrick() {
+		ip = null;
+		brick = null;
+		
+		engines = new HashMap<String, RMIRegulatedMotor>();
+		sensors = new HashMap<String, RMISampleProvider>();
+	}
+	
+	
 	
 	public PFPBrick(String ip) {
+		this();
 		this.ip = ip;
-		brick = null;
 	}
 
 	public boolean init() {
+						
 		initialized = true;
 		try {
 			brick = new RemoteEV3(ip);
@@ -74,5 +96,10 @@ public class PFPBrick {
 		}
 	
 	}
+	
+	public void createSampleProvider(String port, String type, String mode) {
+		
+	}
+	
 	
 }
