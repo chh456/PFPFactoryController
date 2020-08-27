@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import de.uniks.pfp.hardware.PFPBrick;
 import de.uniks.pfp.hardware.PFPMotor;
 import de.uniks.pfp.hardware.PFPSensor;
+import de.uniks.pfp.interfaces.SensorListener;
 import de.uniks.pfp.model.*;
 import de.uniks.pfp.stations.Delivery;
 import de.uniks.pfp.stations.RotatingTable;
@@ -19,7 +20,7 @@ import lejos.remote.ev3.RMIRegulatedMotor;
 import lejos.remote.ev3.RMISampleProvider;
 import lejos.remote.ev3.RemoteEV3;
 
-public class FactoryController {
+public class FactoryController implements SensorListener {
 
 	// FactoryLayout
 	public class FactoryLayout {
@@ -381,4 +382,10 @@ static	ArrayList<BrickToIp> brickList = new ArrayList<>();
 	State s10 = new State ("LT an Einspeisung");
 
 	*/
+
+	@Override
+	public void inform(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -48,6 +48,8 @@ public class PFPMotor implements SensorListener {
 	// Current task this motor is working on
 	PFPMotorTask currentTask;
 	
+	ArrayList <String> timings;
+	
 	static ExecutorService executor;
 	public static void setExecutioner(ExecutorService exec) {
 		executor = exec;
@@ -62,6 +64,20 @@ public class PFPMotor implements SensorListener {
 	public PFPMotor(RMIRegulatedMotor m, String name) {
 		motor = m;
 		id = name;
+	}
+	
+	public void init() {
+		timings = new ArrayList<>();
+		
+		// These lists are used to record when this motor starts, finishes or fails
+		ArrayList<Long> start = new ArrayList<>();
+		ArrayList<Long> finish = new ArrayList<>();
+		ArrayList<Long> failure = new ArrayList<>();
+		
+	}
+	
+	private long getTime() {
+		return System.nanoTime();
 	}
 	
 	public static PFPMotor createMotorWithName(RMIRegulatedMotor m, String name) {

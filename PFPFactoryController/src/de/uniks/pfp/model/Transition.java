@@ -14,6 +14,10 @@ public class Transition implements SensorListener {
 	
 	String description;
 	
+	public String getDescription() {
+		return description;
+	}
+	
 	public Transition (String desc, State b, State e) {
 		begin = b;
 		end = e;
