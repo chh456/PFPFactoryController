@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 
 import de.uniks.pfp.controller.FactoryController;
 import de.uniks.pfp.digitaltwin.DigitalTwin;
+import de.uniks.pfp.digitaltwin.SimTalkSim;
 import de.uniks.pfp.hardware.PFPBrick;
 import de.uniks.pfp.hardware.PFPMotor;
 import de.uniks.pfp.model.State;
