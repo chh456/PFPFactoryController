@@ -1,6 +1,7 @@
 package de.uniks.pfp.testing;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,6 +21,22 @@ public class DigitalTwinTest {
 		done = b;
 	}
 	
+	static DigitalTwin twin = null;
+	
+	
+	
+	public static DigitalTwin getTwin() {
+		return twin;
+	}
+
+
+
+	public static void setTwin(DigitalTwin twin) {
+		DigitalTwinTest.twin = twin;
+	}
+
+
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ExecutorService executor = Executors.newCachedThreadPool();
@@ -31,7 +48,7 @@ public class DigitalTwinTest {
 			System.exit(-1);
 		}
 			
-		DigitalTwin twin = null;
+
 		try {
 			twin = new DigitalTwin();
 		} catch (IOException e1) {
@@ -43,6 +60,26 @@ public class DigitalTwinTest {
 			System.out.println("Twin ist null.");
 			System.exit(-1);
 		}
+		
+		Runnable socketListener = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				try {
+					String antwort = twin.leseNachricht();
+					System.out.println(antwort);
+				} catch (SocketTimeoutException e) {
+					System.out.println("Socket Timeout");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		};
+		
+		executor.execute(socketListener);
 		
 		System.out.println("ST");
 		twin.sendMessage("ST");
@@ -58,6 +95,8 @@ public class DigitalTwinTest {
 		Transition t1 = new Transition("Füllturm füllt Ladungsträger auf Anlieferungsförderband", s1, s2);
 
 		
+		
+
 		
 		t1.setProcedure(new Runnable() {
 
@@ -100,7 +139,7 @@ public class DigitalTwinTest {
 		try {
 			while(!done) {
 				Thread.sleep(50);
-				System.out.println("Wird befüllt.");
+				// System.out.println("Wird befüllt.");
 			}
 				
 		} catch (InterruptedException e1) {
@@ -129,8 +168,21 @@ public class DigitalTwinTest {
 			e.printStackTrace();
 		}
 		
-		System.out.println("CD");
-		twin.sendMessage("CD");
+//		System.out.println("CD");
+//		twin.sendMessage("CD");
+		
+/*		String antwort;
+		
+		try {
+			antwort = twin.leseNachricht();
+			System.out.println(antwort);
+// 			System.out.println("");
+		} catch (SocketTimeoutException e) {
+			System.out.println("Socket Timeout");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} */
 		
 		fuellturm.close();
 		twin.closeSocket();

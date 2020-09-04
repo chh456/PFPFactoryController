@@ -166,6 +166,7 @@ public class SimTalkSim {
     }
 
     private void setIp(String arg) {
+    	System.out.println("Setting ip to " + arg);
         ip = arg;
     }
 

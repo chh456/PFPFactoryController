@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class DigitalTwin {
 
-	private String targetIP = "192.168.0.119";//"localhost";
+	private String targetIP = "192.168.0.119";//"localhost";114
 	private int targetPort = 33333;
 	private int sendErrorCounter = 0;
 	private int numberOfSendTrys = 3;
@@ -182,12 +182,14 @@ public class DigitalTwin {
 
 
 
-	public String leseNachricht(java.net.Socket socket) throws IOException {
+	public String leseNachricht() throws IOException {
 
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 		char[] buffer = new char[200];
 
+		socket.setSoTimeout(20000);
+		
 		int anzahlZeichen = bufferedReader.read(buffer, 0, 200); // blockiert
 
 																	// bis
