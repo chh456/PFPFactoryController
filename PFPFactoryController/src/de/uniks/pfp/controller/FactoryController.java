@@ -388,4 +388,10 @@ static	ArrayList<BrickToIp> brickList = new ArrayList<>();
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void register(PFPSensor s) {
+		// TODO Auto-generated method stub
+		
+	}
 }

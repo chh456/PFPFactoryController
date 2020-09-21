@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import de.uniks.pfp.database.Timing;
 import de.uniks.pfp.interfaces.SensorListener;
 import lejos.remote.ev3.RMIRegulatedMotor;
 
@@ -20,13 +21,7 @@ public class PFPMotor implements SensorListener {
 	volatile boolean sensorStop = false;
 	volatile boolean motorStop = false;
 	
-	// Distance this motor covered
-	int distance = 0;
-	
-	// Adds to this motor distance
-	public void addDistance(int dist) {
-		distance += dist > 0 ? dist : dist*-1;
-	}
+
 	
 	// Sleep interval in ms
 	int interval = 100;
@@ -48,12 +43,36 @@ public class PFPMotor implements SensorListener {
 	// Current task this motor is working on
 	PFPMotorTask currentTask;
 	
-	ArrayList <String> timings;
+	
 	
 	static ExecutorService executor;
-	public static void setExecutioner(ExecutorService exec) {
-		executor = exec;
+	
+	/* These attributes are set when the process is created. 
+	 * 
+	 */
+	
+	int timeToRun;
+	
+
+	
+	/* ---------------- */
+	/* STATISTICAL DATA */
+	/* ---------------- */
+	
+	// Distance this motor covered
+	int distance = 0;
+	
+	// Adds to this motor distance
+	public void addDistance(int dist) {
+		distance += dist > 0 ? dist : dist*-1;
 	}
+	
+	// Saves start,end,failure times of this motor
+	ArrayList <Timing> timings;
+	
+	/* -------------------- */
+	/* STATISTICAL DATA END */
+	/* -------------------- */
 	
 	public PFPMotor(RMIRegulatedMotor m, String port, Character type) {
 		motor = m;
@@ -76,9 +95,9 @@ public class PFPMotor implements SensorListener {
 		
 	}
 	
-	private long getTime() {
+	/* private long getTime() {
 		return System.nanoTime();
-	}
+	} */
 	
 	public static PFPMotor createMotorWithName(RMIRegulatedMotor m, String name) {
 		return new PFPMotor(m, name);
@@ -111,19 +130,7 @@ public class PFPMotor implements SensorListener {
 		return sensorStop;
 	}
 	
-	// This waits for a stop signal either from a sensor or the controller
-	public void waitForStop() {
-		while (!getSensorStop() && !getMotorStop()) {
-			try {
-				Thread.sleep(interval);
-				if (System.currentTimeMillis() % 100 == 0)
-					System.out.println("Sensorstop " + getSensorStop() + " Motorstop " + getMotorStop());
-			} catch (InterruptedException e) {
-				if (debug) System.out.println("Motor " + id + " was interrupted.");
-				emergencyStop();
-			}
-		}
-	}
+
 	
 	private void emergencyStop() {
 		if (debug) System.out.println("Emergencystop for motor " + id);
@@ -233,29 +240,80 @@ public class PFPMotor implements SensorListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 
-	public void close() {
+	public long getTime() {
+		return System.currentTimeMillis();
+	}
+	
+	private void moveMotor(boolean direction) {
+		setStatus(true);
+		try {
+			if (direction) 
+				motor.forward();
+			else
+				motor.backward();
+		} catch (Exception e) {
+			emergencyStop();
+		}
+		setStatus(false);
+	}
+	
+	public void movement(int time, boolean direction) {
+		
+		// (time > -1 ) ? motor.forward() : motor.backward();
+		
+		Runnable move = new Runnable() {
+
+			@Override
+			public void run() {
+				Timing t = new Timing();
+				t.setStart(getTime());
+				// setStatus(true);
+				if (time > 0) {
+					try {
+						moveMotor(direction);
+						Thread.sleep(time);
+					} catch (Exception e) {
+						t.setFailure(getTime());
+						if (debug) e.printStackTrace();
+					} finally {
+						// setStatus(false);
+						t.setEnd(getTime());
+					}
+				} else { 
+					// No time was provided so we wait for a sensor or a controller stop
+					moveMotor(direction);
+					waitForStop();
+				}
+				
+			}
+	
+		};
+		
+	}
+	
+	public boolean close() {
 		if (debug) System.out.println("Closing motor.");
-		// TODO Auto-generated method stub
+
 		try {
 			motor.close();
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			error = true;
-			e.printStackTrace();
+			return false;
 			// We were not able to close the port. Not much we can do anymore.
+		} finally {
+			setStatus(false);
 		}
-	}
-
-
-	@Override
-	public void inform(boolean b) {
-		System.out.println("Informed about sensor status.");
-		sensorStop = true;
+		
+		return true;
+		
 		
 	}
+
+
+
 
 
 	public void setSpeed(int i) {
@@ -268,9 +326,7 @@ public class PFPMotor implements SensorListener {
 		
 	}
 
-	public void setDebug(boolean deb) {
-		debug = deb;
-	}
+
 	
 	@Override
 	public String toString() {
@@ -279,5 +335,57 @@ public class PFPMotor implements SensorListener {
 		str.append("debug is " + debug + " error is " + error);
 		return str.toString();
 	}
+	
+	/* ------ */
+	/* Sensor */
+	/* ------ */
+	
+	PFPSensor sensor = null;
+	
+	// This gets called when a sensor that this motor is registered to gets a new value
+	@Override
+	public void inform(boolean b) {
+		if (debug) System.out.println("Sensor " + sensor.getDescription() + " sends " + b);
+		setSensor(b);
+	}	
+
+	private void setSensor(boolean b) {
+		sensorStop = b;
+	}
+	
+	// This gets called by the sensor
+	@Override
+	public void register(PFPSensor s) {
+		if (debug) System.out.println(s != null ? "Registering motor " + id + " on sensor " + s.getDescription() : "Deleting motor " + id + " on sensor" + s.getDescription());
+		sensor = s;
+	}
+	
+	// This waits for a stop signal either from a sensor or the controller
+	public void waitForStop() {
+		while (!getSensorStop() && !getMotorStop()) {
+			try {
+				Thread.sleep(interval);
+				if (getTime() % 100 == 0)
+					if (debug) System.out.println("Sensorstop " + getSensorStop() + " Motorstop " + getMotorStop());
+			} catch (InterruptedException e) {
+				if (debug) System.out.println("Motor " + id + " was interrupted.");
+				emergencyStop();
+			} finally {
+				// Reset the internal sensor value
+				setSensor(false);
+			}
+		}
+	}
+	
+	
+	public void setDebug(boolean deb) {
+		debug = deb;
+	}
+	
+	public static void setExecutioner(ExecutorService exec) {
+		executor = exec;
+	}
+
+
 
 }

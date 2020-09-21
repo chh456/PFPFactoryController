@@ -1,11 +1,16 @@
 package de.uniks.pfp.model;
 
+import java.util.ArrayList;
+
+import de.uniks.pfp.hardware.PFPSensor;
 import de.uniks.pfp.interfaces.SensorListener;
 
 public class Transition implements SensorListener { 
 	
 	public State begin, end;
 	public Runnable procedure;
+	
+	private ArrayList<Runnable> procedures = new ArrayList<>();
 	
 	boolean sensorStop;
 	
@@ -32,6 +37,10 @@ public class Transition implements SensorListener {
 		procedure = r;
 	}
 	
+	public boolean addProc() {
+		return false;
+	}
+	
 	public State getBegin() {
 		return begin;
 	}
@@ -43,6 +52,12 @@ public class Transition implements SensorListener {
 	@Override
 	public void inform(boolean b) {
 		sensorStop = true;
+		
+	}
+
+	@Override
+	public void register(PFPSensor s) {
+		// TODO Auto-generated method stub
 		
 	}
 

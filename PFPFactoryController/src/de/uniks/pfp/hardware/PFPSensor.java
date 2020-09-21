@@ -11,6 +11,8 @@ import lejos.remote.ev3.RMISampleProvider;
 
 public class PFPSensor {
 
+	String description;
+	
     ExecutorService executor;
     RMISampleProvider sp;
     
@@ -117,14 +119,24 @@ public class PFPSensor {
 		}
     }
 
-    public boolean registerListener(SensorListener sl) {
+    public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public boolean registerListener(SensorListener sl) {
         if (!listener.contains(sl)) {
+        	sl.register(this); // save this sensor in sensor listener
             return listener.add(sl);
         } else return false;
     }
 
     public boolean removeListener(SensorListener sl) {
         if (listener.contains(sl)) {
+        	sl.register(null); // delete the sensor from sensor listener
             return listener.remove(sl);
         } else return true;
     }
