@@ -12,7 +12,7 @@ import lejos.remote.ev3.RMIRegulatedMotor;
 
 public class PFPMotor implements SensorListener {
 
-	String id;
+	String motorId;
 	RMIRegulatedMotor motor; 
 	Character type; // Large or medium
 	String port;
@@ -82,7 +82,7 @@ public class PFPMotor implements SensorListener {
 	
 	public PFPMotor(RMIRegulatedMotor m, String name) {
 		motor = m;
-		id = name;
+		motorId = name;
 	}
 	
 	public void init() {
@@ -114,12 +114,12 @@ public class PFPMotor implements SensorListener {
 	}
 	
 	public void setMotorStop(boolean s) {
-		if (debug) System.out.println("Motorstop was set on " + id + " to " + s);
+		if (debug) System.out.println("Motorstop was set on " + motorId + " to " + s);
 		motorStop = s;
 	}
 	
 	private void setSensorStop(boolean s) {
-		if (debug) System.out.println("Motorstop was set on " + id + " to " + s);
+		if (debug) System.out.println("Motorstop was set on " + motorId + " to " + s);
 		sensorStop = s;
 	}
 	
@@ -133,7 +133,7 @@ public class PFPMotor implements SensorListener {
 
 	
 	private void emergencyStop() {
-		if (debug) System.out.println("Emergencystop for motor " + id);
+		if (debug) System.out.println("Emergencystop for motor " + motorId);
 		try {
 			motor.stop(true);
 		} catch (RemoteException e) {
@@ -154,7 +154,7 @@ public class PFPMotor implements SensorListener {
 
 			@Override
 			public void run() {
-				if (debug) System.out.println("Motor " + id + " moving " + (direction ? "forward" : "backward") + ".");
+				if (debug) System.out.println("Motor " + motorId + " moving " + (direction ? "forward" : "backward") + ".");
 								
 				if (debug) System.out.println(getTachoCount());
 				
@@ -168,10 +168,10 @@ public class PFPMotor implements SensorListener {
 					waitForStop();
 					motor.stop(true);
 					resetMotor();
-					if (debug) System.out.println("Motor " + id + " stopped.");
+					if (debug) System.out.println("Motor " + motorId + " stopped.");
 					setStatus(false);
 				} catch (RemoteException e) {
-					if (debug) System.out.println("Connectionproblem with motor " + id);
+					if (debug) System.out.println("Connectionproblem with motor " + motorId);
 					setStatus(false);
 					error = true;
 				}
@@ -196,7 +196,7 @@ public class PFPMotor implements SensorListener {
 		try {
 			tachoCount = motor.getTachoCount();
 		} catch (RemoteException e) {
-			if (debug) System.out.println("Connection failed to motor " + id + " while retrieving tachocount.");
+			if (debug) System.out.println("Connection failed to motor " + motorId + " while retrieving tachocount.");
 			tachoCount = null;
 			error = true;
 		}
@@ -204,7 +204,7 @@ public class PFPMotor implements SensorListener {
 	}
 	
 	protected PFPMotorTask getTask() {
-		PFPMotorTask newTask = new PFPMotorTask(id, System.currentTimeMillis(), 0);
+		PFPMotorTask newTask = new PFPMotorTask(motorId, System.currentTimeMillis(), 0);
 		return newTask;
 	}
 	public void setStatus(boolean status) {
@@ -242,6 +242,22 @@ public class PFPMotor implements SensorListener {
 		}
 	}
 
+	public void backward(int time) {
+		try {
+			motor.forward();
+			Thread.sleep(time);
+			motor.stop(true);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+		
+	
 	public long getTime() {
 		return System.currentTimeMillis();
 	}
@@ -320,18 +336,23 @@ public class PFPMotor implements SensorListener {
 		try {
 			motor.setSpeed(i);
 		} catch (RemoteException e) {
-			if (debug) System.out.println("Was not able to set speed for motor " + id);
+			if (debug) System.out.println("Was not able to set speed for motor " + motorId);
 			error = true;
 		}
 		
 	}
 
-
+	// rotates the motor. direction true = forward. direction false = backwards.
+	public void rotate(Integer angle) {
+		if (debug) System.out.println("Rotating motor " + motorId + " with angle " + angle + " and direction ");
+		
+		
+	}
 	
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
-		str.append("PFPMotor with id " + id + "\n");
+		str.append("PFPMotor with id " + motorId + "\n");
 		str.append("debug is " + debug + " error is " + error);
 		return str.toString();
 	}
@@ -356,7 +377,7 @@ public class PFPMotor implements SensorListener {
 	// This gets called by the sensor
 	@Override
 	public void register(PFPSensor s) {
-		if (debug) System.out.println(s != null ? "Registering motor " + id + " on sensor " + s.getDescription() : "Deleting motor " + id + " on sensor" + s.getDescription());
+		if (debug) System.out.println(s != null ? "Registering motor " + motorId + " on sensor " + s.getDescription() : "Deleting motor " + motorId + " on sensor" + s.getDescription());
 		sensor = s;
 	}
 	
@@ -368,7 +389,7 @@ public class PFPMotor implements SensorListener {
 				if (getTime() % 100 == 0)
 					if (debug) System.out.println("Sensorstop " + getSensorStop() + " Motorstop " + getMotorStop());
 			} catch (InterruptedException e) {
-				if (debug) System.out.println("Motor " + id + " was interrupted.");
+				if (debug) System.out.println("Motor " + motorId + " was interrupted.");
 				emergencyStop();
 			} finally {
 				// Reset the internal sensor value
