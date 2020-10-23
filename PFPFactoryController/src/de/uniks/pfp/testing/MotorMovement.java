@@ -22,11 +22,15 @@ public class MotorMovement {
 	// Rotate speed
 	Integer speed;
 	
+	// Motor will be registered at this sensor
+	PFPSensor sensor;
+	
 	public MotorMovement(PFPMotor m) {
 		motor = m;
 	}
-	
+
 	public void start() throws MotorNotSetException {
+		if (speed != null) motor.setSpeed(speed);
 		if (motor != null) {
 			
 			if (angle != null) { // Rotate motor with angle
