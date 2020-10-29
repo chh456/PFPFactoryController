@@ -3,12 +3,14 @@ package de.uniks.pfp.controller;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import de.uniks.pfp.database.Database;
 import de.uniks.pfp.hardware.PFPBrick;
 import de.uniks.pfp.hardware.PFPMotor;
 import de.uniks.pfp.hardware.PFPSensor;
@@ -31,6 +33,12 @@ public class FactoryController implements SensorListener {
 		String [] motorTypes = new String[4];
 		String [] sensorPorts = new String[4];
 		String [] sensorTypes = new String[4];
+	}
+	
+	private void dbConnect() {
+		Database db = new Database();
+		Connection con = db.connect("database_model");
+		
 	}
 	
 	static ArrayList<PFPSensor> sensorList = new ArrayList<>();

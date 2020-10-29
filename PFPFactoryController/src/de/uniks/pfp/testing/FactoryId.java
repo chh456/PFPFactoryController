@@ -73,6 +73,25 @@ public class FactoryId {
 		return currentType;
 	}
 	
+	public String getBrickNumber() {
+		return id.substring(0, 2).toString();
+	}
+	
+	public String getIp() {
+		// String result = null;
+		String brick = id.substring(0, 2);	
+		String result = "00".equals(brick) ? null : IPMASK + brick;		
+		return result;
+	}
+	
+	public String getPort() {
+		return id.substring(3, 4).toString();
+	}
+	
+	public String getType() {
+		return id.substring(5,6).toString();
+	}
+	
 	@Override
 	public String toString() {
 		return id.toString();
@@ -81,7 +100,7 @@ public class FactoryId {
 	public static void main(String[] args) {
 		
 		FactoryId id = new FactoryId(13, "A", 'L');
-		id.setBrickNumber(12);
+		id.setBrickNumber(15);
 		// test.replace(29, 31, "13-");
 		System.out.println(id);
 		try {
